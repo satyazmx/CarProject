@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { EmployeeService} from '../shared/employee.service';
+import { DepartmentService } from '../shared/department.service';
+import { NotificationService} from '../shared/notification.service';
+import { MatDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-employee',
@@ -8,14 +11,44 @@ import { EmployeeService} from '../shared/employee.service';
 })
 export class EmployeeComponent implements OnInit {
 
-  departments =[
-    {id:2 ,value: 'Dep1'},
-    {id:3 ,value: 'Dep2'},
-    {id:2 ,value: 'Dep3'}
-  ]
-  constructor( public service : EmployeeService) { }
+
+  constructor( private service : EmployeeService ,
+     private deptService : DepartmentService,
+    private Notification : NotificationService,
+    public dialogRef : MatDialogRef<EmployeeComponent>) { }
 
   ngOnInit() {
+
+    this.service.getEmployees();
+
+  }
+
+  onClear(){
+
+    this.service.form.reset();
+    this.service.initializeFormGroup();
+    
+
+  }
+
+  onSubmit(){
+    if(this.service.form.valid){
+      if( !this.service.form.get('$key').value)
+      this.service.insertEmployees(this.service.form.value);
+      else
+      this.service.updateEmployee(this.service.form.value);
+      this.service.form.reset();
+      this.service.initializeFormGroup();
+      this.Notification.success(':: Successfully Inserted');
+      this.onClose();
+
+    }
+  }
+
+  onClose(){
+    this.service.form.reset();
+    this.service.initializeFormGroup();
+    this.dialogRef.close();
   }
 
 }
